@@ -47,7 +47,7 @@ Highlights
 ## Install and run
 
 ```bat
-git clone https://github.com/<user>/OriginHub.git
+git clone https://github.com/Polimante/OriginHub.git
 cd OriginHub
 pip install -r requirements.txt
 OriginHub.bat
