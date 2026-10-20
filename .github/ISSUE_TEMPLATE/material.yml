@@ -1,0 +1,31 @@
+name: Material defaults
+description: Suggest analysis defaults for a material (baseline wavelength, transition type, edge region)
+labels: [material]
+body:
+  - type: input
+    id: material
+    attributes:
+      label: Material
+      placeholder: "e.g. MAPbI3, CsPbBr3, (PEA)2PbI4, TiO2"
+    validations:
+      required: true
+  - type: textarea
+    id: values
+    attributes:
+      label: Suggested defaults
+      description: Any you know; leave the rest blank.
+      value: |
+        Baseline wavelength (nm, sub-gap):
+        Tauc transition (direct/indirect, allowed/forbidden):
+        Expected band gap (eV):
+        Wavelength region of the absorption edge (nm):
+        Notes (secondary phases, excitonic peak, substrate):
+    validations:
+      required: true
+  - type: textarea
+    id: refs
+    attributes:
+      label: References
+      description: Papers (DOI) supporting these values.
+    validations:
+      required: true

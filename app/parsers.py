@@ -51,12 +51,47 @@ def detect(path: Path) -> str:
 def load(path: Path) -> list[Dataset]:
     kind = detect(path)
     if kind == ABS and path.suffix.lower() == ".sd":
-        return read_agilent_sd(path)
-    if kind == ABS:
-        return [read_jasco(path)]
-    if kind == XRD:
-        return read_powdll(path)
-    raise ValueError(f"Unrecognized format: {path.name}")
+        out = read_agilent_sd(path)
+    elif kind == ABS:
+        out = [read_jasco(path)]
+    elif kind == XRD:
+        out = read_powdll(path)
+    else:
+        raise ValueError(f"Unrecognized format: {path.name}")
+    for ds in out:
+        validate(ds)
+    return out
+
+
+# ------------------------------------------------------------- validation
+class DataError(ValueError):
+    """A reader returned data that the analysis and Origin cannot handle safely."""
+
+
+def validate(ds: Dataset) -> None:
+    """Checks the contract every reader must meet; raises DataError with a readable reason.
+
+    x: 1-D, finite, strictly ascending (the worksheets and fit windows rely on it);
+    y: same length as x, no +/-inf, not all NaN (isolated NaN are allowed: Origin shows gaps).
+    """
+    where = f"{ds.source.name}: sample '{ds.name}'"
+    if not ds.name.strip():
+        raise DataError(f"{ds.source.name}: empty sample name")
+    x, y = np.asarray(ds.x), np.asarray(ds.y)
+    if x.ndim != 1 or y.ndim != 1:
+        raise DataError(f"{where}: x and y must be 1-D arrays")
+    if len(x) != len(y):
+        raise DataError(f"{where}: {len(x)} x values but {len(y)} y values")
+    if len(x) < 2:
+        raise DataError(f"{where}: fewer than 2 points")
+    if not np.all(np.isfinite(x)):
+        raise DataError(f"{where}: x axis has NaN or infinite values")
+    if np.any(np.diff(x) <= 0):
+        raise DataError(f"{where}: x axis is not strictly ascending (repeated or unsorted points)")
+    if np.any(np.isinf(y)):
+        raise DataError(f"{where}: y has infinite values")
+    if np.all(np.isnan(y)):
+        raise DataError(f"{where}: y has no numeric values")
 
 
 # ------------------------------------------------------------------ UV-Vis

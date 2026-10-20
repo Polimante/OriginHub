@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use OriginHub in your research, please cite it as below."
+title: "OriginHub: from raw UV-Vis and XRD files to Origin projects"
+type: software
+authors:
+  - family-names: Polimante
+    given-names: Lucas
+    affiliation: "Universidade Federal do ABC (UFABC)"
+repository-code: "https://github.com/Polimante/OriginHub"
+license: MIT
+version: 0.1.0
+keywords:
+  - UV-Vis
+  - XRD
+  - Tauc plot
+  - Urbach energy
+  - perovskite
+  - OriginLab

@@ -1,0 +1,40 @@
+name: Bug report
+description: Something does not work, a file is not recognized, or a result looks wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: technique
+    attributes:
+      label: Technique
+      options: [UV-Vis, XRD, Other / general]
+    validations:
+      required: true
+  - type: input
+    id: instrument
+    attributes:
+      label: Instrument and file format
+      placeholder: "e.g. JASCO V-780 .txt, Agilent 8453 .SD, PowDLL .xls"
+  - type: input
+    id: versions
+    attributes:
+      label: OriginHub and Origin versions
+      placeholder: "e.g. OriginHub 0.2.0, OriginPro 2025b"
+  - type: textarea
+    id: log
+    attributes:
+      label: Error message or log
+      description: The message shown by the app, or the end of the `.log` file in %LOCALAPPDATA%\OriginHub
+      render: text
+  - type: checkboxes
+    id: data
+    attributes:
+      label: Example file
+      options:
+        - label: I can share an example file that reproduces the problem (do not attach unpublished data you may not share)

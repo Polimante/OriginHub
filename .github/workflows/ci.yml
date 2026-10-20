@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests (Python ${{ matrix.python }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # oldest supported and newest: also covers pandas 2.x (3.10) and 3.x (3.14)
+        python: ["3.10", "3.14"]
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+      - name: Lint (ruff)
+        run: ruff check --output-format=github .
+      - name: Tests (pytest)
+        run: pytest
+
+  no-lab-data:
+    name: No measurement data committed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse raw data and Origin projects
+        run: |
+          bad=$(git ls-files | grep -iE '\.(sd|xls|xlsx|opju|opj|jws|spc|raw)$' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::Measurement data or Origin projects must not be committed (tests generate synthetic files):"
+            echo "$bad"
+            exit 1
+          fi

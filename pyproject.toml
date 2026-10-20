@@ -1,0 +1,24 @@
+# Tool configuration only: OriginHub is run from source (app/main.py), not installed as a package.
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+src = ["app", "tools", "tests"]
+# build.py gets `PAYLOAD = r"..."` prepended by origin_bridge.launch()
+builtins = ["PAYLOAD"]
+
+[tool.ruff.lint]
+# E/W style, F pyflakes (undefined names, unused imports), B likely bugs
+select = ["E", "F", "W", "B"]
+ignore = [
+    "E731",  # small lambdas assigned to names are used on purpose in the binary reader
+    "B905",  # zip(strict=) - lists are built with equal lengths
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["app"]
+addopts = "-ra"
+markers = [
+    "gui: needs PyQt6 (run with QT_QPA_PLATFORM=offscreen on a machine without a display)",
+]

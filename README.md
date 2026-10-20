@@ -116,6 +116,17 @@ De Wolf *et al.* 2014; Ledinský *et al.* 2019; Makuła *et al.* 2018; Zanatta 2
 
 ## Testing
 
+Automated tests need no Origin and run on every pull request (GitHub Actions):
+
+```bat
+pip install -r requirements-dev.txt
+ruff check .
+pytest
+```
+
+They use synthetic files in the real instrument formats, with a known band gap and Urbach
+energy ([`tests/synthetic.py`](tests/synthetic.py)); no lab data is stored in the repository.
+
 `tools/e2e_test.py` builds a real Origin project from a folder of data files,
 exports all graphs as PNG and closes only the Origin instance it opened:
 
@@ -127,6 +138,12 @@ python tools/e2e_test.py XRD path\to\xrd_folder
 `--selftest` modifies the Tauc data after building and checks that Origin's Linear
 Fit recalculates (Eg before/after in the log).
 
+## Contributing
+
+Contributions are welcome: bug reports, instrument formats, material defaults, new techniques.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md). Every pull request must pass the automated checks
+and a review before it is merged.
+
 ## Known limitations / roadmap
 
 * The **Tauc Results** summary keeps the *initial* fit values; after changing a range
@@ -136,7 +153,10 @@ Fit recalculates (Eg before/after in the log).
 * Planned: J-V (solar-cell) module; XRD phase markers (PbI₂, α/δ-FAPbI₃, substrate),
   PbI₂/perovskite peak ratio, Scherrer crystallite size.
 
-## Author
+## Author, license and citation
 
 Lucas Polimante - Universidade Federal do ABC (UFABC).
 Developed with the help of Claude (Anthropic).
+
+Released under the [MIT License](LICENSE). If OriginHub helps your research, please cite it
+(see [`CITATION.cff`](CITATION.cff), or *Cite this repository* on the GitHub page).
