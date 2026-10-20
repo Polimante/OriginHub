@@ -1,6 +1,6 @@
 numpy
 pandas
 openpyxl
-xlrd>=2.0.1
+xlrd>=2.0.2
 PyQt6
 pyqtgraph
