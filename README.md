@@ -44,7 +44,19 @@ Highlights
   Folder* - it defines the line-graph style. Without it Origin's default `line`
   template is used.
 
-## Install and run
+## Install
+
+**Windows installer (recommended, no Python needed):** download
+`OriginHub-Setup-<version>.exe` from the
+[latest release](https://github.com/Polimante/OriginHub/releases/latest) and run it. It installs
+for your user only (no administrator rights) and adds OriginHub to the Start menu.
+
+> Windows may show *"Windows protected your PC"* because the installer is not code-signed
+> yet. Click **More info → Run anyway**. You can check that the file is genuine by comparing
+> its SHA-256 (PowerShell: `Get-FileHash OriginHub-Setup-<version>.exe`) with the `.sha256`
+> file published next to it.
+
+**From source (developers):**
 
 ```bat
 git clone https://github.com/Polimante/OriginHub.git

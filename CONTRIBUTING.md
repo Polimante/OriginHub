@@ -95,6 +95,20 @@ its maintainer.
 - Keep pull requests small and focused on one thing; add an entry under *Unreleased* in
   [CHANGELOG.md](CHANGELOG.md).
 
+## Releasing a version (maintainers)
+
+1. In a PR: set the new number in `app/version.py` (MAJOR.MINOR.PATCH) and rename the
+   *Unreleased* section of `CHANGELOG.md` to `## [x.y.z] - YYYY-MM-DD` (keep an empty
+   *Unreleased* above it). Run the Origin end-to-end test if Origin-side code changed.
+2. After the merge: `git tag vX.Y.Z` on `main` and `git push origin vX.Y.Z`.
+3. The *Release* workflow tests everything, builds the app and the installer, installs it
+   silently, runs `OriginHub.exe --check`, and publishes the installer, its `.sha256` and the
+   changelog section on the Releases page. It refuses a tag that differs from `app/version.py`
+   or a version without a changelog section.
+
+To build locally: `pip install pyinstaller`, install [Inno Setup 6](https://jrsoftware.org/isdl.php), then
+`powershell -ExecutionPolicy Bypass -File packaging\build.ps1 -InstallTest` (output in `dist\`).
+
 ## Code of conduct
 
 This project follows the [Code of Conduct](CODE_OF_CONDUCT.md). By participating you agree to it.

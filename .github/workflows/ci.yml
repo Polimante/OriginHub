@@ -40,6 +40,24 @@ jobs:
       - name: Tests (pytest)
         run: pytest
 
+  windows-app:
+    name: Windows app build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"            # same as the release workflow
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+      - name: Build with PyInstaller and run OriginHub.exe --check
+        # catches a plugin or data file that the frozen app cannot find
+        run: powershell -ExecutionPolicy Bypass -File packaging\build.ps1 -NoInstaller
+
   no-lab-data:
     name: No measurement data committed
     runs-on: ubuntu-latest

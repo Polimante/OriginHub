@@ -17,6 +17,14 @@ Portuguese; all code, comments, UI text and docs must be in English.**
   `pytest app/techniques/uvvis/tests/test_analysis.py::test_reference_spectrum_is_unchanged`
 - Origin end-to-end (needs Origin): `python tools/e2e_test.py ABS <folder> --ref 1000 --thickness 400 --selftest`
   (or `XRD <folder>`; any technique key). Look at the PNGs in `--out`.
+- Windows build: `packaging/build.ps1 [-NoInstaller] [-InstallTest]` (PyInstaller onedir via `packaging/OriginHub.spec`
+  → `dist/OriginHub/`, then Inno Setup `packaging/OriginHub.iss` → `dist/OriginHub-Setup-<ver>.exe` + `.sha256`).
+  The spec bundles non-imported files at the same relative paths (HELP.md, materials/*.toml, origin_side/origin_common.py,
+  techniques/*/origin_build.py) and collects technique modules as hidden imports (pkgutil discovery). The frozen exe
+  has no console: `OriginHub.exe --check <report.txt>` self-tests and sets the exit code. Version: `app/version.py`.
+- Release: tag `vX.Y.Z` (must equal `app/version.py`, CHANGELOG needs a `## [X.Y.Z]` section, see
+  `tools/release_notes.py`) → `.github/workflows/release.yml` builds, install-tests and publishes the GitHub Release.
+  Installer is per-user (`{autopf}` = %LOCALAPPDATA%\Programs\OriginHub, no UAC); never change its AppId.
 - CI (`.github/workflows/ci.yml`): ruff + pytest on windows-latest, Python 3.11 and 3.14, plus a job that fails
   if raw data / `.opju` files are tracked. `main` is protected: PR + green CI required (enforced for admins too).
 

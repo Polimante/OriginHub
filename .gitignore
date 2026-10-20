@@ -17,3 +17,7 @@ venv/
 data/
 exemplos/
 examples/
+
+# build output (packaging/build.ps1)
+build/
+dist/

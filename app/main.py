@@ -19,8 +19,12 @@ from core import origin_bridge as ob
 from core.materials import load_materials
 from core.registry import discover
 from core.tab import BrokenTab
+from version import __version__
 
-HELP_FILE = Path(__file__).resolve().parent.parent / "HELP.md"
+APP_DIR = Path(__file__).resolve().parent
+# source checkout: HELP.md is next to app/; installed (PyInstaller): it is bundled next to main
+HELP_FILE = next((p for p in (APP_DIR / "HELP.md", APP_DIR.parent / "HELP.md") if p.is_file()),
+                 APP_DIR.parent / "HELP.md")
 
 
 class HelpDialog(QDialog):
@@ -46,7 +50,7 @@ class HelpDialog(QDialog):
 class MainWindow(QMainWindow):
     def __init__(self, registry=None):
         super().__init__()
-        self.setWindowTitle("OriginHub")
+        self.setWindowTitle(f"OriginHub {__version__}")
         self.resize(1200, 820)
         self.setAcceptDrops(True)
 
@@ -246,7 +250,44 @@ class MainWindow(QMainWindow):
             self._timer.stop()
 
 
+def check(report: Path | None = None) -> int:
+    """`--check [report.txt]`: loads every technique and material profile without opening a window.
+
+    Used to smoke-test the installed/frozen app (are all bundled files found?). Exit code 0 = OK.
+    The installed app has no console, so the report can also be written to a file.
+    """
+    from core.materials import load_materials
+    reg = discover()
+    mats, mat_errors = load_materials(reg.techniques.values())
+    lines = [f"OriginHub {__version__}"]
+    lines += [f"  technique {t.key}: {len(t.readers)} reader(s), Origin script {t.origin_script.name}"
+              for t in reg.techniques.values()]
+    lines.append(f"  materials: {', '.join(m.name for m in mats)}")
+    lines.append(f"  Origin helpers: {ob.ORIGIN_COMMON.is_file()}  help: {HELP_FILE.is_file()}")
+    problems = [f"technique {k}: {v.strip().splitlines()[-1]}" for k, v in reg.failures.items()]
+    problems += [f"material {k}: {v}" for k, v in mat_errors.items()]
+    if not ob.ORIGIN_COMMON.is_file():
+        problems.append(f"missing {ob.ORIGIN_COMMON}")
+    if not HELP_FILE.is_file():
+        problems.append(f"missing {HELP_FILE}")
+    if not reg.techniques:
+        problems.append("no technique loaded")
+    lines += [f"PROBLEM: {p}" for p in problems]
+    lines.append("OK" if not problems else "FAILED")
+    text = "\n".join(lines)
+    print(text)                                   # no-op in the windowed exe (no console)
+    if report:
+        report.write_text(text + "\n", encoding="utf-8")
+    return 1 if problems else 0
+
+
 def main():
+    if "--check" in sys.argv:
+        rest = sys.argv[sys.argv.index("--check") + 1:]
+        sys.exit(check(Path(rest[0]) if rest else None))
+    if "--version" in sys.argv:
+        print(__version__)
+        sys.exit(0)
     pg.setConfigOptions(antialias=True)
     app = QApplication(sys.argv)
     w = MainWindow()
