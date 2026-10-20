@@ -3,10 +3,10 @@ synthetic spectra whose true values are known, and must not drift silently.
 """
 import numpy as np
 import pytest
-from conftest import LAM
-from synthetic import HC, uvvis_absorbance
 
-import analysis as an
+from techniques.uvvis import analysis as an
+from techniques.uvvis.tests.fixtures import LAM
+from techniques.uvvis.tests.synthetic import HC, uvvis_absorbance
 
 
 def run(eg=1.55, eu=0.020, d_nm=400.0, noise=0.0, ref=1000.0, n=0.5):
@@ -44,6 +44,19 @@ def test_alpha_units():
 @pytest.mark.parametrize("label, n", list(an.TRANSITIONS.items()))
 def test_every_transition_has_an_exponent_label(label, n):
     assert n in an.EXPONENT_LABEL
+
+
+def test_material_transition_ids_map_to_labels():
+    assert set(an.TRANSITION_IDS.values()) == set(an.TRANSITIONS)
+
+
+def test_edge_search_follows_material_settings():
+    """A wide-gap material: the edge must be found inside the search region of its profile."""
+    a = uvvis_absorbance(LAM, eg=2.30, eu=0.025)
+    a_corr, _ = an.baseline(LAM, a, 700.0)
+    lo, hi = an.suggest_range(LAM, a_corr, a, width=35.0, lam_min=400.0)
+    assert hi - lo == pytest.approx(70.0)
+    assert lo < HC / 2.30 < hi
 
 
 # ------------------------------------------------------------ known answers

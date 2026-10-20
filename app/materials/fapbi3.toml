@@ -1,0 +1,12 @@
+name = "FAPbI3"
+description = "Formamidinium lead iodide (alpha phase), Eg ~ 1.53 eV (~810 nm)."
+references = []
+
+[uvvis]
+# 850 nm is still inside the Urbach tail of FAPbI3; use >= 900-1000 nm when the instrument
+# measures that far (Agilent 8454: up to 1100 nm). On a shorter axis the nearest point is used.
+baseline_nm = 1000
+transition = "direct_allowed"
+a_max = 3.0
+edge_min_nm = 300       # the longest-wavelength edge wins, so residual PbI2 (~500 nm) is skipped
+edge_window_nm = 45

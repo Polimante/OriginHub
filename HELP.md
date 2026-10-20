@@ -43,12 +43,13 @@ the table.
 
 | Option | What it does |
 |---|---|
+| **Material** (top bar) | Loads the defaults of a material profile (baseline wavelength, transition, A max, where to look for the absorption edge and the width of the automatic Tauc range). Pick *Generic* for an unlisted material. You can still change every option by hand afterwards. Profiles are plain text files in `app/materials/`; new ones are welcome (see CONTRIBUTING.md). |
 | **Baseline at** (nm) | Subtracts from each spectrum its absorbance at this wavelength (mean within ±2 nm). Use a region **below the band gap** where the film does not absorb. For FAPbI₃ (Eg ≈ 1.53 eV, ~810 nm) prefer ≥ 900–1000 nm when the instrument measures that far (Agilent 8454 goes to 1100 nm); 850 nm is still inside the Urbach tail. |
 | **Tauc + Urbach** | Turns the band-gap and Urbach analysis on/off. |
 | Transition type | Direct allowed (n = 1/2, default for lead-halide perovskites), direct forbidden (3/2), indirect allowed (2), indirect forbidden (3). |
 | **A max** | Points whose *raw* absorbance is above this value are excluded from Tauc/Urbach (detector saturation; default 3). |
 | **Thickness** + **Apply to all** | Film thickness in nm. Also editable per sample in the table. Optional: it only scales α, so **Eg and E_U do not depend on it**. If any sample has no thickness, α is reported in arbitrary units for all samples. |
-| **Auto range** | Resets the Tauc range of every sample to the automatic suggestion. |
+| **Auto range** | Resets the Tauc range of every sample to the automatic suggestion (its width comes from the material profile). |
 | **Tauc range** (table) | Wavelength window searched for the Tauc fit, e.g. `740-830`. Edit it per sample if the automatic choice is wrong. |
 
 ### Preview

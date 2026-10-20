@@ -19,6 +19,13 @@ TRANSITIONS = {
     "Indirect forbidden (n = 3)": 3.0,
 }
 EXPONENT_LABEL = {0.5: "2", 1.5: "2/3", 2.0: "1/2", 3.0: "1/3"}
+# ids used in material profiles (app/materials/*.toml) -> label above
+TRANSITION_IDS = {
+    "direct_allowed": "Direct allowed (n = 1/2)",
+    "direct_forbidden": "Direct forbidden (n = 3/2)",
+    "indirect_allowed": "Indirect allowed (n = 2)",
+    "indirect_forbidden": "Indirect forbidden (n = 3)",
+}
 
 
 # ------------------------------------------------------------ processing

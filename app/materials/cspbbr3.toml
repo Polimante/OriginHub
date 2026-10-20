@@ -1,0 +1,10 @@
+name = "CsPbBr3"
+description = "Cesium lead bromide, wide gap (Eg ~ 2.3 eV, edge ~ 530 nm). Reference welcome."
+references = []
+
+[uvvis]
+baseline_nm = 700       # well below the gap and away from the edge
+transition = "direct_allowed"
+a_max = 3.0
+edge_min_nm = 400
+edge_window_nm = 35     # sharper edge on a shorter wavelength scale

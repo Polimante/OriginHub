@@ -1,0 +1,13 @@
+# Default analysis settings when the material is not listed.
+# To add a material: copy this file, change the values, and open a pull request
+# (see CONTRIBUTING.md). Keys you leave out use the technique's defaults.
+name = "Generic"
+description = "Default settings for an unlisted semiconductor film."
+references = []
+
+[uvvis]
+baseline_nm = 850       # sub-gap wavelength whose absorbance is subtracted (mean of +/- 2 nm)
+transition = "direct_allowed"   # direct_allowed | direct_forbidden | indirect_allowed | indirect_forbidden
+a_max = 3.0             # raw absorbance above this is treated as detector saturation
+edge_min_nm = 300       # the absorption-edge search ignores shorter wavelengths (glass/ITO, deep UV)
+edge_window_nm = 45     # automatic Tauc range: +/- this around the edge

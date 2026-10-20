@@ -13,7 +13,7 @@ raw files ──► OriginHub (recognize · clean · preview · analyze) ──�
 | | UV-Vis (absorbance) | XRD |
 |---|---|---|
 | **Input** | JASCO V-780 `.txt`; Agilent 8453/8454 ChemStation `.SD` (multi-spectrum binary) | PowDLL `.xls`/`.xlsx` |
-| **Processing** | Baseline subtraction at a chosen wavelength, transmittance, Tauc band gap, Urbach energy | Min-max normalization |
+| **Processing** | Material profiles set the defaults; baseline subtraction at a chosen wavelength, transmittance, Tauc band gap, Urbach energy | Min-max normalization |
 | **Origin output** | `Raw`, `Baseline`, `Transmittance` sheets + one graph each; per-sample Tauc and Urbach graphs with Origin **Linear Fit** reports (auto-recalculating); results summary | `Raw` and `normalized` sheets, each plotted as *Stacked Lines by Y Offsets* |
 
 Highlights
@@ -39,7 +39,7 @@ Highlights
 
 * Windows with **Origin/OriginPro 2021 or newer** (developed and tested with
   OriginPro **2025b**) and a valid license.
-* Python ≥ 3.10 with the packages in `requirements.txt`.
+* Python ≥ 3.11 with the packages in `requirements.txt`.
 * Optional: an Origin graph template called **`PadraoLinha`** in Origin's *User Files
   Folder* - it defines the line-graph style. Without it Origin's default `line`
   template is used.
@@ -63,26 +63,41 @@ the app (**Help** button).
 
 ```
 app/
-├── main.py            PyQt6 GUI (tabs, tables, pyqtgraph preview, Help dialog)
-├── parsers.py         file recognition + readers (JASCO TXT, Agilent .SD, PowDLL Excel)
-├── analysis.py        baseline, %T, alpha, Tauc/Urbach columns and fit-window selection
-├── origin_bridge.py   finds Origin, writes the JSON payload, launches Origin
-└── origin_side/
-    └── build.py       runs INSIDE Origin's embedded Python: sheets, graphs, Linear Fits
+├── main.py                 window: hosts the technique tabs, material selector, export
+├── core/                   technique-independent parts
+│   ├── dataset.py          Dataset + validate() (the contract every reader must meet)
+│   ├── registry.py         Technique/Reader interface, plugin discovery and isolation
+│   ├── materials.py        material profiles (app/materials/*.toml)
+│   ├── tab.py              base tab: sample table, preview plot, export button
+│   └── origin_bridge.py    finds Origin, common payload, run folder, launches Origin
+├── origin_side/
+│   └── origin_common.py    runs INSIDE Origin: shared helpers + run() entry point
+├── techniques/             one independent plugin per technique
+│   ├── uvvis/              readers, analysis, payload, tab, origin_build.py, tests/
+│   └── xrd/                the smallest plugin: start here for a new technique
+└── materials/              generic.toml, fapbi3.toml, mapbi3.toml, cspbbr3.toml
+tests/                      tests of the core (each technique has its own tests/)
 tools/
-└── e2e_test.py        end-to-end test against a real Origin installation
-HELP.md                user guide + references (shown by the Help button)
+└── e2e_test.py             end-to-end test against a real Origin installation
+HELP.md                     user guide + references (shown by the Help button)
 ```
 
-1. The app processes the data in regular Python (numpy/pandas) and writes a JSON
-   payload to `%LOCALAPPDATA%\OriginHub\` (an ASCII-only path - Origin's command line
-   does not like accented paths).
-2. It starts the newest Origin with `Origin64.exe -rs run -pyf build_<…>.py`.
+1. Each file is offered to every technique's readers; the one that recognizes the
+   content with the highest confidence reads it, and the result is validated.
+2. On export, the technique processes the data in regular Python (numpy/pandas) and
+   adds its keys to a JSON payload. The app writes a run folder in
+   `%LOCALAPPDATA%\OriginHub\` (an ASCII-only path - Origin's command line does not
+   like accented paths) with the payload, `origin_common.py`, **only this technique's**
+   `origin_build.py`, and a small `launch.py`.
+3. It starts the newest Origin with `Origin64.exe -rs run -pyf <run folder>\launch.py`.
    No COM registration is needed, so it works even when COM still points to an
    older Origin.
-3. `build.py` runs in Origin's embedded Python (3.11, **no numpy**), using only the
-   standard library and `originpro`/LabTalk. It writes a `.log` next to the payload;
-   the app watches it and reports *Done* or the error.
+4. The scripts run in Origin's embedded Python (3.11, **no numpy**), using only the
+   standard library and `originpro`/LabTalk. They write `payload.json.log`; the app
+   watches it and reports *Done* or the error.
+
+A technique that fails to load (a bug, a missing dependency) shows an error tab;
+the other techniques keep working.
 
 ### Agilent `.SD` format
 
