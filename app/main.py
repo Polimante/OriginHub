@@ -302,7 +302,10 @@ def check(report: Path | None = None) -> int:
     lines += [f"  technique {t.key}: {len(t.readers)} reader(s), Origin script {t.origin_script.name}"
               for t in reg.techniques.values()]
     lines.append(f"  materials: {', '.join(m.name for m in mats)}")
-    lines.append(f"  Origin helpers: {ob.ORIGIN_COMMON.is_file()}  help: {HELP_FILE.is_file()}")
+    from core.environment import bundled_templates
+    templates = [p.stem for p in bundled_templates()]
+    lines.append(f"  Origin helpers: {ob.ORIGIN_COMMON.is_file()}  help: {HELP_FILE.is_file()}  "
+                 f"templates: {', '.join(templates) or 'none'}")
     problems = [f"technique {k}: {v.strip().splitlines()[-1]}" for k, v in reg.failures.items()]
     problems += [f"material {k}: {v}" for k, v in mat_errors.items()]
     if not ob.ORIGIN_COMMON.is_file():
@@ -311,6 +314,8 @@ def check(report: Path | None = None) -> int:
         problems.append(f"missing {HELP_FILE}")
     if not reg.techniques:
         problems.append("no technique loaded")
+    if "PadraoLinha" not in templates:
+        problems.append("graph template PadraoLinha not bundled")
     lines += [f"PROBLEM: {p}" for p in problems]
     lines.append("OK" if not problems else "FAILED")
     text = "\n".join(lines)

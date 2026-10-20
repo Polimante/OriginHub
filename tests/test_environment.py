@@ -80,3 +80,8 @@ def test_a_crashing_check_does_not_stop_the_others(monkeypatch, tmp_path):
 
 def test_documents_folder_exists():
     assert env.documents_folder().is_dir()
+
+
+def test_padraolinha_is_bundled():
+    """The default graph template (Origin's User Files) ships with the app."""
+    assert "PadraoLinha" in [p.stem for p in env.bundled_templates()]

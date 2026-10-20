@@ -5,6 +5,13 @@ MAJOR (breaking changes) . MINOR (new features) . PATCH (fixes).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-20
+
+### Added
+- The **PadraoLinha** graph template (the line-graph style used by OriginHub) is now included.
+  If it is missing from Origin's User Files Folder, *Help → Setup check…* offers to install it
+  (an existing template with that name is never replaced).
+
 ## [0.3.0] - 2026-10-20
 
 ### Added
