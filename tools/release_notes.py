@@ -18,4 +18,5 @@ def section(version: str, text: str) -> str:
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")      # the Windows console code page cannot encode e.g. "→"
     sys.stdout.write(section(sys.argv[1].lstrip("v"), CHANGELOG.read_text(encoding="utf-8")))
