@@ -9,17 +9,23 @@ import sys
 import time
 from pathlib import Path
 
-import pyqtgraph as pg
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox, QFileDialog, QHBoxLayout,
-                             QLabel, QLineEdit, QMainWindow, QMessageBox, QPushButton, QStatusBar, QTabWidget,
+import bootstrap
+
+if __name__ == "__main__" and not bootstrap.ensure_packages():      # source checkout without the packages
+    sys.exit(1)
+
+import pyqtgraph as pg  # noqa: E402
+from PyQt6.QtCore import QSettings, Qt, QTimer  # noqa: E402
+from PyQt6.QtGui import QAction  # noqa: E402
+from PyQt6.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox, QFileDialog, QHBoxLayout,  # noqa: E402
+                             QLabel, QLineEdit, QMainWindow, QMenu, QMessageBox, QPushButton, QStatusBar, QTabWidget,
                              QTextBrowser, QVBoxLayout, QWidget)
 
-from core import origin_bridge as ob
-from core.materials import load_materials
-from core.registry import discover
-from core.tab import BrokenTab
-from version import __version__
+from core import origin_bridge as ob  # noqa: E402
+from core.materials import load_materials  # noqa: E402
+from core.registry import discover  # noqa: E402
+from core.tab import BrokenTab  # noqa: E402
+from version import __version__  # noqa: E402
 
 APP_DIR = Path(__file__).resolve().parent
 # source checkout: HELP.md is next to app/; installed (PyInstaller): it is bundled next to main
@@ -48,8 +54,9 @@ class HelpDialog(QDialog):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, registry=None):
+    def __init__(self, registry=None, settings: QSettings | None = None):
         super().__init__()
+        self.settings = settings or QSettings("OriginHub", "OriginHub")
         self.setWindowTitle(f"OriginHub {__version__}")
         self.resize(1200, 820)
         self.setAcceptDrops(True)
@@ -97,8 +104,15 @@ class MainWindow(QMainWindow):
         btn_out.setFixedWidth(30)
         btn_out.clicked.connect(self.pick_out)
         btn_help = QPushButton("Help")
-        btn_help.setToolTip("How to use OriginHub, what each analysis does, and references")
-        btn_help.clicked.connect(lambda: HelpDialog(self).exec())
+        menu = QMenu(btn_help)
+        for text, slot in (("User guide…", lambda: HelpDialog(self).exec()),
+                           ("Check for updates…", lambda: self.check_updates(manual=True)),
+                           ("Setup check…", self.setup_check),
+                           ("About OriginHub…", self.about)):
+            act = QAction(text, menu)
+            act.triggered.connect(slot)
+            menu.addAction(act)
+        btn_help.setMenu(menu)
 
         top = QHBoxLayout()
         top.addWidget(btn_files)
@@ -136,6 +150,31 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage(f"{len(self.material_errors)} material profile(s) ignored "
                                          "(hover for details).", 15000)
             self.statusBar().setToolTip("\n".join(f"{k}: {v}" for k, v in self.material_errors.items()))
+
+    # ------------------------------------------------------------ start-up, updates, setup
+    def startup(self):
+        """After the window is shown: setup check on the first run, then the update check."""
+        if not self.settings.value("setup/done", False, type=bool):
+            self.setup_check()
+            self.settings.setValue("setup/done", True)
+        if self.settings.value("updates/auto", True, type=bool):
+            self.check_updates(manual=False)
+
+    def check_updates(self, manual: bool = True):
+        from core.dialogs import check_for_updates
+        check_for_updates(self, self.settings, manual)
+
+    def setup_check(self):
+        from core.dialogs import SetupDialog
+        SetupDialog(self.settings, self).exec()
+
+    def about(self):
+        from core.environment import env_summary
+        QMessageBox.about(self, "About OriginHub",
+                          f"<b>OriginHub {__version__}</b><br>From raw UV-Vis and XRD files to Origin projects."
+                          "<br><br>Lucas Polimante - Universidade Federal do ABC (UFABC).<br>MIT License."
+                          "<br><a href='https://github.com/Polimante/OriginHub'>github.com/Polimante/OriginHub</a>"
+                          f"<br><br><small>{env_summary()}</small>")
 
     # ------------------------------------------------------------ material
     def current_material(self):
@@ -281,10 +320,25 @@ def check(report: Path | None = None) -> int:
     return 1 if problems else 0
 
 
+def self_update() -> int:
+    """`--self-update`: check, download, verify and install without asking (automated update test)."""
+    from core import updater
+    try:
+        rel = updater.check()
+        if rel is None:
+            return 0
+        updater.launch_installer(updater.download(rel))
+        return 0
+    except Exception:
+        return 1
+
+
 def main():
     if "--check" in sys.argv:
         rest = sys.argv[sys.argv.index("--check") + 1:]
         sys.exit(check(Path(rest[0]) if rest else None))
+    if "--self-update" in sys.argv:
+        sys.exit(self_update())
     if "--version" in sys.argv:
         print(__version__)
         sys.exit(0)
@@ -292,6 +346,7 @@ def main():
     app = QApplication(sys.argv)
     w = MainWindow()
     w.show()
+    QTimer.singleShot(500, w.startup)
     if len(sys.argv) > 1:
         w.load_paths([Path(a) for a in sys.argv[1:]])
     sys.exit(app.exec())

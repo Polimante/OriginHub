@@ -43,6 +43,7 @@ jobs:
   windows-app:
     name: Windows app build
     runs-on: windows-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -54,9 +55,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller
-      - name: Build with PyInstaller and run OriginHub.exe --check
-        # catches a plugin or data file that the frozen app cannot find
-        run: powershell -ExecutionPolicy Bypass -File packaging\build.ps1 -NoInstaller
+      - name: Build app + installer, install, self-check, self-update
+        # catches a plugin or data file that the frozen app cannot find, and a broken updater
+        run: powershell -ExecutionPolicy Bypass -File packaging\build.ps1 -InstallTest -UpdateTest
 
   no-lab-data:
     name: No measurement data committed

@@ -168,6 +168,31 @@ The preview can show raw or normalized data, stacked or overlaid.
   `%LOCALAPPDATA%\OriginHub\` and shown by OriginHub.
 * Files that are not recognized are skipped; hover over the status bar to see which.
 
+### Setup check (Help → Setup check…)
+
+Shown automatically the first time OriginHub starts. It lists what OriginHub needs outside
+itself and its status: **Origin** (2021 or newer; it cannot be installed by OriginHub because
+it needs a license), the **work folder** in `%LOCALAPPDATA%\OriginHub`, and the **graph
+template** in Origin's User Files Folder. When something can be fixed automatically (for
+example, copying a bundled template that is missing) a button appears next to it. **Nothing
+is changed unless you click it**, and existing templates are never overwritten. Origin's User
+Files Folder is learned from Origin itself on the first export; open Origin once if it is
+reported as not found.
+
+When OriginHub runs from source (not installed) and Python packages are missing, it asks
+whether to install them with `pip` before starting; it does nothing if you answer no.
+
+### Updates (Help → Check for updates…)
+
+OriginHub checks GitHub for a new version when it starts (in the background; it stays quiet
+when offline or up to date). Turn this off with the check box in the update or setup window.
+When a new version exists you see what changed and can choose **Download and install**,
+**Skip this version** or **Later**. The installer is downloaded from the project's GitHub
+Releases page, its SHA-256 checksum is verified (a damaged or altered file is deleted and
+nothing is installed), it installs over the current version and OriginHub restarts. If
+OriginHub was installed *for all users* (in `Program Files`), Windows asks for permission
+during the update. Only published versions are offered, never work in progress.
+
 ---
 
 ## 6. References

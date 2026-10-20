@@ -5,6 +5,24 @@ MAJOR (breaking changes) . MINOR (new features) . PATCH (fixes).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-20
+
+### Added
+- **Automatic updates**: OriginHub checks GitHub for a new version at start-up (in the
+  background, silent when offline) and from *Help → Check for updates…*. It shows what changed
+  and offers *Download and install*, *Skip this version* or *Later*. The installer's SHA-256 is
+  verified before anything is installed; OriginHub restarts on the new version.
+- **Setup check** (first start and *Help → Setup check…*): Origin version, work folder and graph
+  template, with one-click fixes that run only when clicked and never overwrite existing files.
+  Origin reports its User Files Folder on every export so the check knows where to look.
+- Starting from source with missing Python packages asks whether to install them with pip.
+- *Help* menu: user guide, check for updates, setup check, about (with version details for bug reports).
+- Every pull request now builds the installer, installs it, and runs a real self-update from a
+  local test release (download, checksum, silent reinstall, restart).
+
+> Versions before 0.3.0 have no updater: install 0.3.0 once from the Releases page; later
+> versions are offered inside the app.
+
 ## [0.2.0] - 2026-10-20
 
 ### Added

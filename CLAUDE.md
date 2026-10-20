@@ -25,8 +25,22 @@ Portuguese; all code, comments, UI text and docs must be in English.**
 - Release: tag `vX.Y.Z` (must equal `app/version.py`, CHANGELOG needs a `## [X.Y.Z]` section, see
   `tools/release_notes.py`) → `.github/workflows/release.yml` builds, install-tests and publishes the GitHub Release.
   Installer is per-user (`{autopf}` = %LOCALAPPDATA%\Programs\OriginHub, no UAC); never change its AppId.
-- CI (`.github/workflows/ci.yml`): ruff + pytest on windows-latest, Python 3.11 and 3.14, plus a job that fails
-  if raw data / `.opju` files are tracked. `main` is protected: PR + green CI required (enforced for admins too).
+- Updates (`core/updater.py`): GitHub `releases/latest` → needs `OriginHub-Setup-<v>.exe` + `.sha256` assets from
+  `https://github.com/Polimante/OriginHub/releases/download/`; SHA-256 verified; installer run with `/SILENT /RELAUNCH=1`
+  (Inno `[Code] ShouldRelaunch` restarts the app). `ORIGINHUB_UPDATE_API` env var = test-only override (local fake
+  release in `build.ps1 -UpdateTest`); `OriginHub.exe --self-update` = non-interactive update for that test. Only the
+  frozen app self-updates. Lucas installed 0.2.0 *for all users* (Program Files, HKLM): updates there show a UAC prompt.
+- `build.ps1 -InstallTest` refuses to run where OriginHub is registered (HKCU/HKLM) unless `$env:CI`: installing
+  would hijack the real installation's uninstall entry. Install/update tests run only in GitHub Actions.
+- Setup check (`core/environment.py`, `core/dialogs.py`): first run (`QSettings` `setup/done`) and Help menu; Origin
+  >= 2021, work folder, templates from `app/resources/templates/*.otpu` copied (never overwritten) to the User Files
+  Folder that `origin_common.save_origin_paths()` writes to `%LOCALAPPDATA%\OriginHub\origin_paths.json`
+  (`op.path('u')`, verified). `app/bootstrap.py` (stdlib + Tk) asks before pip-installing missing packages (source only).
+- Tests never touch the network or the real settings: pass `settings=QSettings(<tmp ini>)` to `MainWindow`; `startup()`
+  (setup + update check) is called by `main()` only.
+- CI (`.github/workflows/ci.yml`): ruff + pytest on windows-latest, Python 3.11 and 3.14; "Windows app build"
+  (`build.ps1 -InstallTest -UpdateTest`); a job that fails if raw data / `.opju` files are tracked. `main` is
+  protected: PR + these 4 checks green (enforced for admins too). Claude may merge PRs itself once CI is green.
 
 ## Architecture (plugins)
 - `app/core/`: `dataset.py` (Dataset, `validate()`, `x_signature`), `registry.py` (Technique/Reader interface,

@@ -140,6 +140,25 @@ def style_fit_curve(gl):
 
 
 # ------------------------------------------------------------------- main
+def save_origin_paths():
+    """Tells the app where Origin's User Files Folder is (used by its setup check)."""
+    import os
+    uff = ""
+    try:
+        uff = op.path("u")
+    except Exception:
+        try:
+            op.lt_exec("string __ohuff$ = %Y;")
+            uff = op.get_lt_str("__ohuff")
+        except Exception:
+            pass
+    if uff:
+        work = os.path.dirname(os.path.dirname(PAYLOAD))          # %LOCALAPPDATA%\OriginHub
+        with open(os.path.join(work, "origin_paths.json"), "w", encoding="utf-8") as f:
+            json.dump({"user_files": uff}, f)
+        log("User Files Folder: " + uff)
+
+
 def run(payload_path):
     """Entry point called by launch.py."""
     global PAYLOAD
@@ -149,6 +168,10 @@ def run(payload_path):
         with open(PAYLOAD, encoding="utf-8") as f:
             cfg = json.load(f)
         op.set_show(True)
+        try:
+            save_origin_paths()
+        except Exception:
+            log("could not read the User Files Folder")
         for b in list(op.pages("w")):                 # the empty Book1 that Origin opens on its own
             if all(not w.to_list(c) for w in b for c in range(w.cols)):
                 b.destroy()
