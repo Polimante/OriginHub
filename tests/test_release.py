@@ -1,5 +1,7 @@
 """Release bookkeeping: version number, changelog section, and the --check self-test."""
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -45,3 +47,13 @@ def test_self_check_passes(tmp_path):
     assert main.check(report) == 0
     text = report.read_text(encoding="utf-8")
     assert __version__ in text and text.strip().endswith("OK")
+
+
+def test_release_notes_script_writes_utf8_on_any_console():
+    """The CHANGELOG has non-ASCII text (→, ₂); CI's Windows console uses cp1252."""
+    env = {k: v for k, v in os.environ.items() if k not in ("PYTHONIOENCODING", "PYTHONUTF8")}
+    env["PYTHONIOENCODING"] = "cp1252"
+    out = subprocess.run([sys.executable, str(ROOT / "tools" / "release_notes.py"), __version__],
+                         capture_output=True, env=env)
+    assert out.returncode == 0, out.stderr.decode(errors="replace")
+    assert out.stdout.decode("utf-8").strip()
