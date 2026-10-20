@@ -5,7 +5,17 @@ MAJOR (breaking changes) . MINOR (new features) . PATCH (fixes).
 
 ## [Unreleased]
 
+### Changed
+- Techniques are now independent plugins (`app/techniques/uvvis`, `app/techniques/xrd`), each with its
+  own readers, tab, Origin script and tests. A technique that fails to load shows an error tab and
+  the others keep working; each Origin export copies only its own technique's script.
+- Python 3.11 or newer is required (it was 3.10).
+
 ### Added
+- Material profiles (`app/materials/*.toml`: Generic, FAPbI3, MAPbI3, CsPbBr3) selectable in the
+  window: baseline wavelength, transition, A max and absorption-edge search per material.
+  Contributed profiles are validated by the tests.
+- Guide for adding a material or a technique in CONTRIBUTING.md.
 - Data validation: every reader's output is checked (finite, strictly ascending X; matching
   lengths; numeric Y) and files that fail are skipped with the reason.
 - Automated tests on synthetic spectra with known band gap and Urbach energy, payload contract

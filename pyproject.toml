@@ -2,10 +2,8 @@
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py311"
 src = ["app", "tools", "tests"]
-# build.py gets `PAYLOAD = r"..."` prepended by origin_bridge.launch()
-builtins = ["PAYLOAD"]
 
 [tool.ruff.lint]
 # E/W style, F pyflakes (undefined names, unused imports), B likely bugs
@@ -16,7 +14,7 @@ ignore = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "app/techniques"]
 pythonpath = ["app"]
 addopts = "-ra"
 markers = [

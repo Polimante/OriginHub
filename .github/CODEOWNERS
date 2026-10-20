@@ -1,4 +1,9 @@
 # Every pull request needs approval from the code owner of the files it touches.
-# When techniques become independent plugins, each folder can get its own owner, e.g.:
+# Later rules win: give each technique its own maintainer when one volunteers, e.g.
 #   /app/techniques/xrd/   @Polimante @xrd-maintainer
-*   @Polimante
+*                          @Polimante
+/app/core/                 @Polimante
+/app/origin_side/          @Polimante
+/app/materials/            @Polimante
+/app/techniques/uvvis/     @Polimante
+/app/techniques/xrd/       @Polimante

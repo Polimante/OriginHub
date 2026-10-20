@@ -20,8 +20,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # oldest supported and newest: also covers pandas 2.x (3.10) and 3.x (3.14)
-        python: ["3.10", "3.14"]
+        # oldest supported (tomllib, Origin's embedded Python) and newest
+        python: ["3.11", "3.14"]
     env:
       QT_QPA_PLATFORM: offscreen
     steps:

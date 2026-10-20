@@ -1,0 +1,10 @@
+name = "MAPbI3"
+description = "Methylammonium lead iodide, Eg ~ 1.6 eV (~780 nm); E_U ~ 15 meV by PDS/FTPS."
+references = ["https://doi.org/10.1021/jz500279b"]   # De Wolf et al., J. Phys. Chem. Lett. 5, 1035 (2014)
+
+[uvvis]
+baseline_nm = 900
+transition = "direct_allowed"
+a_max = 3.0
+edge_min_nm = 300
+edge_window_nm = 45

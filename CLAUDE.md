@@ -10,31 +10,43 @@ Origin project by launching Origin and running a Python script inside it. The us
 Portuguese; all code, comments, UI text and docs must be in English.**
 
 ## Commands
-- Install: `pip install -r requirements.txt` (numpy, pandas, openpyxl, xlrd, PyQt6, pyqtgraph)
+- Install: `pip install -r requirements.txt` (numpy, pandas, openpyxl, xlrd, PyQt6, pyqtgraph); Python >= 3.11 (tomllib)
 - Run: `OriginHub.bat` or `python app/main.py [files or folders...]`
-- Syntax check (especially `app/origin_side/build.py` before it runs in Origin): `python -m py_compile <file>`
-- Dev tools: `pip install -r requirements-dev.txt`; lint `ruff check .`; tests `pytest`
-  (single test: `pytest tests/test_analysis.py::test_reference_spectrum_is_unchanged`). Config in `pyproject.toml`.
-- CI (`.github/workflows/ci.yml`): ruff + pytest on windows-latest, Python 3.10 and 3.14, plus a job that fails
-  if raw data / `.opju` files are tracked. `main` is meant to be changed only through reviewed PRs.
+- Dev tools: `pip install -r requirements-dev.txt`; lint `ruff check .`; tests `pytest` (config in `pyproject.toml`,
+  `testpaths = tests + app/techniques`). Single test:
+  `pytest app/techniques/uvvis/tests/test_analysis.py::test_reference_spectrum_is_unchanged`
+- Origin end-to-end (needs Origin): `python tools/e2e_test.py ABS <folder> --ref 1000 --thickness 400 --selftest`
+  (or `XRD <folder>`; any technique key). Look at the PNGs in `--out`.
+- CI (`.github/workflows/ci.yml`): ruff + pytest on windows-latest, Python 3.11 and 3.14, plus a job that fails
+  if raw data / `.opju` files are tracked. `main` is protected: PR + green CI required (enforced for admins too).
+
+## Architecture (plugins)
+- `app/core/`: `dataset.py` (Dataset, `validate()`, `x_signature`), `registry.py` (Technique/Reader interface,
+  `discover()` imports each `app/techniques/<pkg>` in try/except → `Registry.failures`; `identify()` picks the
+  reader with the highest `detect()` score, a crashing detector counts as 0; `load()` sets `kind` and validates),
+  `materials.py` (TOML profiles validated against each technique's `material_schema`), `tab.py` (TechniqueTab base:
+  table/preview/export + hooks; BrokenTab), `origin_bridge.py` (common payload, run folder, launch).
+- `app/techniques/<name>/`: `__init__.py` (`TECHNIQUE`), `readers.py`, `tab.py` (Qt imported lazily in `make_tab`),
+  `origin_build.py` (defines `build(cfg)`, optional `selftest(cfg)`), `tests/` (`synthetic.py` writers,
+  `fixtures.py` registered in root `conftest.py` via `pytest_plugins`). UV-Vis = key `ABS` (`analysis.py`,
+  `payload.py`); XRD = key `XRD` (smallest, the template for new techniques). Techniques never import each other.
+- `app/materials/*.toml`: Generic (first), FAPbI3 (baseline 1000 nm), MAPbI3, CsPbBr3. The main window's
+  Material box calls `tab.apply_material(values)`; UV-Vis resets only automatic Tauc ranges (`tauc_range_auto`).
+- `app/main.py` only hosts tabs, routes files, launches Origin; a technique that fails to import or to build its
+  tab gets a "⚠" error tab and the others keep working.
 
 ## Tests (no Origin needed)
-- `tests/synthetic.py` generates spectra with known Eg/E_U and writes them as JASCO `.txt`, Agilent `.SD`
-  and PowDLL `.xlsx`; never add real lab data to the repo.
+- Synthetic files with known Eg/E_U in the real formats (JASCO `.txt`, Agilent `.SD`, PowDLL `.xlsx`); never add
+  real lab data to the repo.
 - `test_reference_spectrum_is_unchanged` locks the fit-window output: update it only for a deliberate,
-  explained scientific change. `test_origin_bridge.py` is the payload contract with `build.py` - add any new
-  key `build.py` reads. `test_origin_side.py` enforces stdlib + `originpro` imports and Python 3.11 syntax.
-- `parsers.load()` runs `parsers.validate()` on every Dataset (finite strictly ascending x, matching lengths);
-  the GUI lists failing files as "Skipped" with the reason.
+  explained scientific change. Each technique's payload test is the contract with its `origin_build.py`.
+  `tests/test_origin_side.py` checks every Origin-side script: Python 3.11 syntax, stdlib + `originpro` +
+  `origin_common` imports only, no relative imports, imported helper names exist in `origin_common.py`.
+- GUI tests run offscreen (`QT_QPA_PLATFORM=offscreen`, set in root `conftest.py`).
 
 ## Layout
-- `app/main.py` GUI (tabs per technique, editable table, pyqtgraph preview, Help dialog → `HELP.md`)
-- `app/parsers.py` `detect()` by content + readers: JASCO V-780 `.txt`, Agilent 8453/8454 `.SD`
-  (reverse-engineered binary, several spectra per file), PowDLL `.xls` (XRD)
-- `app/analysis.py` baseline, %T, α, Tauc/Urbach columns, **fit-window selection** (preview fits use numpy)
-- `app/origin_bridge.py` finds newest Origin, groups samples by X grid, writes JSON payload, launches Origin
-- `app/origin_side/build.py` runs **inside Origin** (embedded Python 3.11, **no numpy** - stdlib + `originpro` only)
-- `tools/e2e_test.py` real end-to-end test; `HELP.md` user guide + references; `README.md`
+- `tools/e2e_test.py` real end-to-end test; `HELP.md` user guide + references; `README.md`; `CONTRIBUTING.md`
+  (how to add a material / a technique)
 - Parent folder `Scripts Origin/` (not in the repo) holds legacy LabTalk scripts (`*.ogs`, Portuguese)
   and the user's example data in `exemplos/` (never commit data).
 
@@ -42,8 +54,10 @@ Portuguese; all code, comments, UI text and docs must be in English.**
 - Origin 2025b: `C:\Program Files\OriginLab\Origin2025b\Origin64.exe`. COM (`Origin.Application`) points
   to the old Origin 2018 → **do not use COM**. Launch: `"Origin64.exe" -rs run -pyf "<script>"` as ONE
   command string (passing a list double-escapes the quotes).
-- Payload + script copy go to `%LOCALAPPDATA%\OriginHub\` (ASCII path; Origin's command line breaks on accents).
-  The script copy starts with `PAYLOAD = r"..."`; `build.py` logs to `<payload>.log` and ends with `OK`.
+- Each export writes a run folder `%LOCALAPPDATA%\OriginHub\run_<KEY>_<stamp>\` (ASCII path; Origin's command
+  line breaks on accents) with `payload.json`, `origin_common.py`, the technique's script as `origin_build.py` and
+  `launch.py` (`PAYLOAD = r"..."`, `sys.path.insert`, pops cached modules, `origin_common.run(PAYLOAD)`).
+  Importing modules from that folder inside Origin works (verified e2e, Origin 2025b). Log: `payload.json.log`, ends with `OK`.
 - XRD stacked graph: `plotxy iy:=[Book]Sheet!(1,2:end) plot:=200 ogl:=[<new template:=OffsetStackY>]`
   (brackets = new page; without them plots land in the previous graph).
 - Native Linear Fit (what the user wants): `xop execute:=init classname:=FitLinear iotrgui:=tree`, set
