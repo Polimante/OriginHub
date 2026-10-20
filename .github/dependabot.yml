@@ -1,0 +1,12 @@
+# Opens pull requests when a dependency or a GitHub Action has a new version.
+# They go through CI like any other contribution.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

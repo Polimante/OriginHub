@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: User guide
+    url: https://github.com/Polimante/OriginHub/blob/main/HELP.md
+    about: How to use OriginHub, what each analysis does, and references

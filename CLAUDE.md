@@ -1,9 +1,31 @@
-# OriginHub - context for Claude
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## OriginHub
 
 Desktop app (PyQt6) that reads raw UV-Vis / XRD files, previews them and builds an
 Origin project by launching Origin and running a Python script inside it. The user
 (Lucas, UFABC) researches perovskite thin films / solar cells. **Talk to the user in
 Portuguese; all code, comments, UI text and docs must be in English.**
+
+## Commands
+- Install: `pip install -r requirements.txt` (numpy, pandas, openpyxl, xlrd, PyQt6, pyqtgraph)
+- Run: `OriginHub.bat` or `python app/main.py [files or folders...]`
+- Syntax check (especially `app/origin_side/build.py` before it runs in Origin): `python -m py_compile <file>`
+- Dev tools: `pip install -r requirements-dev.txt`; lint `ruff check .`; tests `pytest`
+  (single test: `pytest tests/test_analysis.py::test_reference_spectrum_is_unchanged`). Config in `pyproject.toml`.
+- CI (`.github/workflows/ci.yml`): ruff + pytest on windows-latest, Python 3.10 and 3.14, plus a job that fails
+  if raw data / `.opju` files are tracked. `main` is meant to be changed only through reviewed PRs.
+
+## Tests (no Origin needed)
+- `tests/synthetic.py` generates spectra with known Eg/E_U and writes them as JASCO `.txt`, Agilent `.SD`
+  and PowDLL `.xlsx`; never add real lab data to the repo.
+- `test_reference_spectrum_is_unchanged` locks the fit-window output: update it only for a deliberate,
+  explained scientific change. `test_origin_bridge.py` is the payload contract with `build.py` - add any new
+  key `build.py` reads. `test_origin_side.py` enforces stdlib + `originpro` imports and Python 3.11 syntax.
+- `parsers.load()` runs `parsers.validate()` on every Dataset (finite strictly ascending x, matching lengths);
+  the GUI lists failing files as "Skipped" with the reason.
 
 ## Layout
 - `app/main.py` GUI (tabs per technique, editable table, pyqtgraph preview, Help dialog → `HELP.md`)

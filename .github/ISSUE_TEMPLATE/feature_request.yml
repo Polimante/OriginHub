@@ -1,0 +1,30 @@
+name: New technique, analysis or instrument format
+description: Propose support for a characterization technique, an analysis, or a new file format
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of addition?
+      options: [New instrument / file format, New analysis in an existing technique, New technique, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: Description
+      description: What should OriginHub do, and what should the Origin output look like (sheets, graphs, fits)?
+    validations:
+      required: true
+  - type: textarea
+    id: method
+    attributes:
+      label: Method and references
+      description: Equations, parameters and literature references (DOI) for the analysis.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I can share an example file in this format
+        - label: I would like to implement it myself
