@@ -56,3 +56,11 @@ Name: "{autodesktop}\OriginHub"; Filename: "{app}\OriginHub.exe"; Tasks: desktop
 
 [Run]
 Filename: "{app}\OriginHub.exe"; Description: "{cm:LaunchProgram,OriginHub}"; Flags: nowait postinstall skipifsilent
+; the in-app updater runs the installer with /SILENT /RELAUNCH=1: start OriginHub again afterwards
+Filename: "{app}\OriginHub.exe"; Flags: nowait runasoriginaluser; Check: ShouldRelaunch
+
+[Code]
+function ShouldRelaunch: Boolean;
+begin
+  Result := WizardSilent and (ExpandConstant('{param:RELAUNCH|0}') = '1');
+end;

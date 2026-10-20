@@ -44,7 +44,7 @@ jobs:
           ruff check .
           pytest
       - name: Build and check app + installer
-        run: powershell -ExecutionPolicy Bypass -File packaging\build.ps1 -InstallTest
+        run: powershell -ExecutionPolicy Bypass -File packaging\build.ps1 -InstallTest -UpdateTest
       - name: Keep the installer as a workflow artifact
         uses: actions/upload-artifact@v4
         with:

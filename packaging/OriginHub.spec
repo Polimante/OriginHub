@@ -21,13 +21,16 @@ datas = [(str(ROOT / "HELP.md"), "."),
 datas += [(str(f), "materials") for f in sorted((APP / "materials").glob("*.toml"))]
 for script in sorted((APP / "techniques").glob("*/origin_build.py")):
     datas.append((str(script), f"techniques/{script.parent.name}"))
+# Origin graph templates offered by the setup check (app/resources/templates/*.otpu)
+datas += [(str(f), "resources/templates") for f in sorted((APP / "resources" / "templates").glob("*.otp*"))]
 
 a = Analysis(
     [str(APP / "main.py")],
     pathex=[str(APP)],
     hiddenimports=hidden,
     datas=datas,
-    excludes=["pytest", "tkinter", "PyQt5", "PySide2", "PySide6", "IPython", "matplotlib"],
+    excludes=["pytest", "tkinter",  # tkinter: only bootstrap.py uses it, never in the frozen app
+              "PyQt5", "PySide2", "PySide6", "IPython", "matplotlib"],
     noarchive=False,
 )
 pyz = PYZ(a.pure)
