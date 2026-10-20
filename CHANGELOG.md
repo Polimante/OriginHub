@@ -5,6 +5,16 @@ MAJOR (breaking changes) . MINOR (new features) . PATCH (fixes).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-20
+
+### Added
+- Windows installer (`OriginHub-Setup-<version>.exe`): no Python needed, installs per user
+  without administrator rights, Start menu shortcut, uninstaller. Built, installed and checked
+  automatically by GitHub Actions for every release and published on the Releases page with its
+  SHA-256 checksum.
+- `OriginHub.exe --check` (self-test of the installed app) and `--version`; the version is shown
+  in the window title.
+
 ### Changed
 - Techniques are now independent plugins (`app/techniques/uvvis`, `app/techniques/xrd`), each with its
   own readers, tab, Origin script and tests. A technique that fails to load shows an error tab and
@@ -20,7 +30,7 @@ MAJOR (breaking changes) . MINOR (new features) . PATCH (fixes).
   lengths; numeric Y) and files that fail are skipped with the reason.
 - Automated tests on synthetic spectra with known band gap and Urbach energy, payload contract
   tests, static checks of the Origin-side script, and a GUI smoke test.
-- Continuous integration on GitHub (lint + tests on Windows, Python 3.10 and 3.14).
+- Continuous integration on GitHub (lint + tests on Windows, Python 3.11 and 3.14).
 - MIT license, contribution guide, code of conduct, issue/PR templates, citation file.
 
 ## [0.1.0] - 2026-10-19
