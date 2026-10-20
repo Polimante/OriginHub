@@ -47,7 +47,9 @@ function Test-Update([string]$dir, [string]$setup) {
     try {
         Start-Sleep -Seconds 2
         $env:ORIGINHUB_UPDATE_API = "$base/latest.json"
-        $p = Start-Process -FilePath $exe -ArgumentList "--self-update" -Wait -PassThru
+        # not -Wait: it also waits for child processes, i.e. the installer and the restarted app
+        $p = Start-Process -FilePath $exe -ArgumentList "--self-update" -PassThru
+        if (-not $p.WaitForExit(180000)) { throw "--self-update did not finish in 3 minutes" }
         if ($p.ExitCode -ne 0) { throw "--self-update failed (exit $($p.ExitCode))" }
         $relaunched = $null
         for ($i = 0; $i -lt 90 -and -not $relaunched; $i++) {

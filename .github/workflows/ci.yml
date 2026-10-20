@@ -43,6 +43,7 @@ jobs:
   windows-app:
     name: Windows app build
     runs-on: windows-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
