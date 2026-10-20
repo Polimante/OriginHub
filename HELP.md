@@ -163,7 +163,8 @@ The preview can show raw or normalized data, stacked or overlaid.
   OriginHub looks for installations in `Program Files\OriginLab\` and selects the
   newest one.
 * Graph style comes from the user template **PadraoLinha** (saved in Origin's
-  *User Files Folder*). If it does not exist, Origin's default `line` template is used.
+  *User Files Folder*). It is included with OriginHub: if it is missing, *Help → Setup
+  check…* offers to install it. Without it, Origin's default `line` template is used.
 * If Origin shows an error, the full message is written to a `.log` file in
   `%LOCALAPPDATA%\OriginHub\` and shown by OriginHub.
 * Files that are not recognized are skipped; hover over the status bar to see which.
