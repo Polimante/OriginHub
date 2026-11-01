@@ -47,7 +47,7 @@ jobs:
       - name: Build and check app + installer
         run: powershell -ExecutionPolicy Bypass -File packaging\build.ps1 -InstallTest -UpdateTest
       - name: Keep the installer as a workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: OriginHub-Setup-${{ steps.version.outputs.version }}
           path: dist/OriginHub-Setup-*
